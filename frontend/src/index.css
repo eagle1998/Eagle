@@ -1363,6 +1363,42 @@
     color: var(--old-silver);
   }
 
+  .footer-credit {
+    text-align: center;
+    width: 100%;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--glass-border);
+    margin-top: 0.5rem;
+  }
+
+  .footer-credit p {
+    font-family: var(--font-ui);
+    font-size: 0.72rem;
+    color: var(--old-silver);
+    margin: 0;
+  }
+
+  .footer-credit-link {
+    color: var(--warm-silver);
+    text-decoration: none;
+    font-weight: 600;
+    transition: color 200ms ease, text-decoration-color 200ms ease;
+    text-decoration: underline;
+    text-decoration-color: transparent;
+    text-underline-offset: 2px;
+  }
+
+  .footer-credit-link:hover {
+    color: var(--eagle-gold);
+    text-decoration-color: var(--eagle-gold);
+  }
+
+  .footer-credit-link:focus-visible {
+    outline: 2px solid var(--eagle-gold);
+    outline-offset: 4px;
+    border-radius: 4px;
+  }
+
   /* ============= ADMIN LAYOUT ============= */
   .admin-layout {
     min-height: 100vh;
