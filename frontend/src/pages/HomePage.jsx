@@ -71,6 +71,11 @@ export default function HomePage() {
   const deliveryInfo = settings.deliveryInfo || 'Free delivery on orders above ₹500.';
   const mapUrl = settings.googleMapsLink || DEFAULT_MAP;
 
+  const heroTitle = settings.heroTitle || 'Premium Spirits, Delivered to Your Doorstep';
+  const heroSubtitle = settings.heroSubtitle || "Curated selection of the world's finest whiskies, wines, champagnes & more. Ice cold perfection, every time.";
+  const tagline = settings.tagline || 'Premium Spirits & Fine Wines';
+  const titleParts = heroTitle.split(/,\s*/);
+
   const displayPrice = (p) => (p.discount > 0 ? p.price * (1 - p.discount / 100) : p.price);
   const isInStock = (p) => p.stockStatus === 'in_stock' || p.stockStatus === 'low_stock';
 
@@ -146,14 +151,20 @@ export default function HomePage() {
         <div className="hero-bg" />
         <div className="container-x">
           <div className="flex flex-col items-center text-center max-w-4xl mx-auto">
-            <span className="eyebrow">Premium Spirits & Fine Wines</span>
+            <span className="eyebrow">{tagline}</span>
             <h1 className="mb-6 leading-[1.05]">
-              Premium Spirits,
-              <br />
-              <span className="text-gradient">Delivered to Your Doorstep</span>
+              {titleParts.length > 1 ? (
+                <>
+                  {titleParts.slice(0, -1).join(', ')},
+                  <br />
+                  <span className="text-gradient">{titleParts[titleParts.length - 1]}</span>
+                </>
+              ) : (
+                <span className="text-gradient">{heroTitle}</span>
+              )}
             </h1>
             <p className="hero-subtitle !max-w-2xl mx-auto text-center" style={{ marginBottom: '2.5rem' }}>
-              Curated selection of the world's finest whiskies, wines, champagnes & more. Ice cold perfection, every time.
+              {heroSubtitle}
             </p>
             <div className="hero-cta justify-center">
               <Button

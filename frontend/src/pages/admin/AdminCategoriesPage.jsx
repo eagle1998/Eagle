@@ -11,6 +11,10 @@ import Alert from '../../components/ui/Alert';
 
 const emptyForm = { name: '', slug: '', description: '', isActive: true, sortOrder: 0 };
 
+const slugify = (str) => String(str || '').toLowerCase().trim().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+
+const isValidSlug = (slug) => /^[a-z0-9-]+$/.test(slug);
+
 export default function AdminCategoriesPage() {
   const { loading: authLoading, user } = useRedirect();
   const [categories, setCategories] = useState([]);
@@ -23,6 +27,8 @@ export default function AdminCategoriesPage() {
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState(null);
   const [search, setSearch] = useState('');
+  const [autoSlug, setAutoSlug] = useState(true);
+  const [slugError, setSlugError] = useState('');
 
   const userInitial = user?.name?.[0]?.toUpperCase() || user?.email?.[0]?.toUpperCase() || 'A';
 
@@ -39,23 +45,35 @@ export default function AdminCategoriesPage() {
     (c.slug || '').toLowerCase().includes(search.toLowerCase())
   );
 
-  const openCreate = () => { setForm({ ...emptyForm }); setEditing(null); setError(null); setSuccess(null); setModal(true); };
+  const openCreate = () => { setForm({ ...emptyForm }); setEditing(null); setError(null); setSuccess(null); setSlugError(''); setAutoSlug(true); setModal(true); };
   const openEdit = (c) => {
     setForm({ name: c.name || '', slug: c.slug || '', description: c.description || '', isActive: c.isActive !== false, sortOrder: c.sortOrder || 0 });
-    setEditing(c); setError(null); setSuccess(null); setModal(true);
+    setEditing(c); setError(null); setSuccess(null); setSlugError(''); setAutoSlug(false); setModal(true);
   };
-  const closeModal = () => { setModal(false); setEditing(null); setForm({ ...emptyForm }); setError(null); setSuccess(null); };
+  const closeModal = () => { setModal(false); setEditing(null); setForm({ ...emptyForm }); setError(null); setSuccess(null); setSlugError(''); setAutoSlug(true); };
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
+    if (name === 'slug') setAutoSlug(false);
+    if (name === 'name' && autoSlug && !editing) {
+      setForm(p => ({ ...p, name: value, slug: slugify(value) }));
+      return;
+    }
     setForm(p => ({ ...p, [name]: type === 'checkbox' ? checked : value }));
+    if (name === 'slug') setSlugError('');
   };
 
   const submit = async (e) => {
     e.preventDefault();
-    setSaving(true);
     setError(null);
+    setSlugError('');
+    const slug = slugify(form.slug);
+    if (!slug || !isValidSlug(slug)) {
+      setSlugError('Slug must contain only lowercase letters, numbers and hyphens (e.g. premium-wines).');
+      return;
+    }
+    setSaving(true);
     try {
-      const payload = { ...form, sortOrder: Number(form.sortOrder) };
+      const payload = { ...form, slug, sortOrder: Number(form.sortOrder) };
       if (editing) {
         await api.put(`/categories/${editing._id || editing.id}`, payload);
         setSuccess('Category updated successfully!');
@@ -196,7 +214,16 @@ export default function AdminCategoriesPage() {
             <form onSubmit={submit}>
               <div className="form-row">
                 <Input label="Name" name="name" value={form.name} onChange={handleChange} required placeholder="Category name" />
-                <Input label="Slug" name="slug" value={form.slug} onChange={handleChange} required placeholder="category-slug" />
+                <Input
+                  label="Slug"
+                  name="slug"
+                  value={form.slug}
+                  onChange={handleChange}
+                  required
+                  placeholder="category-slug"
+                  error={slugError || undefined}
+                  helper={!slugError ? 'Auto-generated from name. Lowercase letters, numbers and hyphens.' : undefined}
+                />
               </div>
               <Input label="Description" name="description" rows={3} value={form.description} onChange={handleChange} placeholder="Optional description" />
               <div className="flex items-end gap-6 mb-6">

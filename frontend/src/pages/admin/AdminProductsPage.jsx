@@ -17,6 +17,10 @@ const emptyForm = {
   alcohol: '', volume: '', origin: '', images: [], imagesInput: '', accent: ''
 };
 
+const slugify = (str) => String(str || '').toLowerCase().trim().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+
+const isValidSlug = (slug) => /^[a-z0-9-]+$/.test(slug);
+
 export default function AdminProductsPage() {
   const { loading: authLoading, user } = useRedirect();
   const [products, setProducts] = useState([]);
@@ -29,6 +33,8 @@ export default function AdminProductsPage() {
   const [success, setSuccess] = useState(null);
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState(null);
+  const [autoSlug, setAutoSlug] = useState(true);
+  const [slugError, setSlugError] = useState('');
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
 
@@ -53,7 +59,7 @@ export default function AdminProductsPage() {
     return matchSearch && matchStatus;
   });
 
-  const openCreate = () => { setForm({ ...emptyForm }); setEditing(null); setError(null); setSuccess(null); setModal(true); };
+  const openCreate = () => { setForm({ ...emptyForm }); setEditing(null); setError(null); setSuccess(null); setSlugError(''); setAutoSlug(true); setModal(true); };
   const openEdit = (p) => {
     setForm({
       name: p.name || '', slug: p.slug || '', category: p.category?._id || p.category || '',
@@ -62,25 +68,37 @@ export default function AdminProductsPage() {
       isFeatured: p.isFeatured || false, alcohol: p.alcohol || '', volume: p.volume || '',
       origin: p.origin || '', images: p.images || [], imagesInput: (p.images || []).join(', '), accent: p.accent || ''
     });
-    setEditing(p); setError(null); setSuccess(null); setModal(true);
+    setEditing(p); setError(null); setSuccess(null); setSlugError(''); setAutoSlug(false); setModal(true);
   };
-  const closeModal = () => { setModal(false); setEditing(null); setForm({ ...emptyForm }); setError(null); setSuccess(null); };
+  const closeModal = () => { setModal(false); setEditing(null); setForm({ ...emptyForm }); setError(null); setSuccess(null); setSlugError(''); setAutoSlug(true); };
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
+    if (name === 'slug') setAutoSlug(false);
+    if (name === 'name' && autoSlug && !editing) {
+      setForm(prev => ({ ...prev, name: value, slug: slugify(value) }));
+      return;
+    }
     setForm(prev => ({ ...prev, [name]: type === 'checkbox' ? checked : value }));
+    if (name === 'slug') setSlugError('');
   };
 
   const submit = async (e) => {
     e.preventDefault();
-    setSaving(true);
     setError(null);
+    setSlugError('');
+    const slug = slugify(form.slug);
+    if (!slug || !isValidSlug(slug)) {
+      setSlugError('Slug must contain only lowercase letters, numbers and hyphens (e.g. premium-whisky).');
+      return;
+    }
+    setSaving(true);
     try {
       if (!form.category) {
         throw new Error('Please select a category for the product.');
       }
       const images = form.imagesInput ? form.imagesInput.split(',').map(u => u.trim()).filter(Boolean) : form.images;
-      const payload = { ...form, images, price: Number(form.price), discount: Number(form.discount), stock: Number(form.stock) };
+      const payload = { ...form, slug, images, price: Number(form.price), discount: Number(form.discount), stock: Number(form.stock) };
       delete payload.imagesInput;
       if (editing) {
         await api.put(`/products/${editing._id || editing.id}`, payload);
@@ -299,10 +317,19 @@ export default function AdminProductsPage() {
             <form onSubmit={submit}>
               <div className="form-row">
                 <Input label="Name" name="name" value={form.name} onChange={handleChange} required placeholder="Product name" />
-                <Input label="Slug" name="slug" value={form.slug} onChange={handleChange} required placeholder="product-slug" />
+                <Input
+                  label="Slug"
+                  name="slug"
+                  value={form.slug}
+                  onChange={handleChange}
+                  required
+                  placeholder="product-slug"
+                  error={slugError || undefined}
+                  helper={!slugError ? 'Auto-generated from name. Lowercase letters, numbers and hyphens.' : undefined}
+                />
               </div>
               <div className="form-row">
-                <Input type="select" label="Category" name="category" value={form.category} onChange={handleChange}>
+                <Input type="select" label="Category" name="category" value={form.category} required onChange={handleChange}>
                   <option value="">No category</option>
                   {categories.map(c => <option key={c._id || c.id} value={c._id || c.id}>{c.name}</option>)}
                 </Input>
