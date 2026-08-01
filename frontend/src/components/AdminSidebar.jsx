@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { NavLink, Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import api from '../services/api';
 import {
   LayoutDashboard, Package, List, ShoppingBag, Settings, ArrowLeft, LogOut,
   Menu, X, Wine
@@ -17,8 +18,13 @@ export default function AdminSidebar() {
   const { user, logout } = useAuth();
   const location = useLocation();
   const [open, setOpen] = useState(false);
+  const [storeName, setStoreName] = useState('Eagle Shop');
 
   useEffect(() => { setOpen(false); }, [location.pathname]);
+
+  useEffect(() => {
+    api.get('/settings').then((d) => { if (d?.storeName) setStoreName(d.storeName); }).catch(() => {});
+  }, []);
 
   const userInitial = user?.name?.[0]?.toUpperCase() || user?.email?.[0]?.toUpperCase() || 'A';
 
@@ -65,7 +71,7 @@ export default function AdminSidebar() {
             <Wine size={20} strokeWidth={2.2} />
           </div>
           <div className="min-w-0">
-            <strong>Eagle Shop</strong>
+            <strong>{storeName}</strong>
             <span>Admin Panel</span>
           </div>
         </div>

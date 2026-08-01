@@ -12,7 +12,7 @@ const defaultSettings = {
   storeName: '', tagline: '', email: '', phone: '', whatsappNumber: '',
   address: '', businessHours: '', googleMapsLink: '',
   heroTitle: '', heroSubtitle: '',
-  aboutSection: '', storeDescription: '',
+  aboutTitle: '', aboutSection: '', storeDescription: '',
   deliveryInfo: '', policies: '', termsConditions: '', privacyPolicy: '',
   deliveryCharge: '', freeDeliveryThreshold: '', faq: '',
   instagram: '', facebook: '', twitter: ''
@@ -40,7 +40,7 @@ export default function AdminSettingsPage() {
         address: data.address || '', businessHours: data.businessHours || '',
         googleMapsLink: data.googleMapsLink || '',
         heroTitle: data.heroTitle || '', heroSubtitle: data.heroSubtitle || '',
-        aboutSection: data.aboutSection || '', storeDescription: data.storeDescription || '',
+        aboutTitle: data.aboutTitle || '', aboutSection: data.aboutSection || '', storeDescription: data.storeDescription || '',
         deliveryInfo: data.deliveryInfo || '', policies: data.policies || '',
         termsConditions: data.termsConditions || '', privacyPolicy: data.privacyPolicy || '',
         deliveryCharge: data.deliveryCharge || '', freeDeliveryThreshold: data.freeDeliveryThreshold || '',
@@ -178,6 +178,7 @@ export default function AdminSettingsPage() {
               <h2 className="font-ui text-[0.98rem] mb-5 pb-3 border-b font-bold tracking-wide flex items-center gap-2" style={{ color: 'var(--eagle-gold)', borderColor: 'var(--glass-border)' }}>
                 About & Description
               </h2>
+              <Input label="About Title" name="aboutTitle" value={settings.aboutTitle} onChange={handleChange} placeholder="About Eagle Shop" />
               <Input label="About Section" name="aboutSection" rows={4} value={settings.aboutSection} onChange={handleChange} placeholder="About your store..." />
               <Input label="Store Description (SEO)" name="storeDescription" rows={3} value={settings.storeDescription} onChange={handleChange} placeholder="SEO description..." />
             </section>

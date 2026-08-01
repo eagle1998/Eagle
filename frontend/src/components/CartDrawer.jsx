@@ -47,8 +47,9 @@ export default function CartDrawer({ settings = {} }) {
       const { default: api } = await import('../services/api');
       const settings = await api.get('/settings').catch(() => ({}));
       const number = settings?.whatsappNumber || settings?.phone || '919594799320';
-      
-      let msg = `*New Order — Eagle Shop*\n\n`;
+      const storeName = settings?.storeName || 'Eagle Shop';
+
+      let msg = `*New Order — ${storeName}*\n\n`;
       msg += `*Customer Details*\n`;
       msg += `Name: ${form.name}\n`;
       msg += `Phone: ${form.phone}\n`;

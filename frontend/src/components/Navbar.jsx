@@ -3,6 +3,7 @@ import { Link, NavLink, useLocation } from 'react-router-dom';
 import { Menu, X, ShoppingBag, User, LogIn } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
+import api from '../services/api';
 import logo from '../assets/logo.png';
 
 const NAV_LINKS = [
@@ -15,9 +16,17 @@ const NAV_LINKS = [
 export default function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [settings, setSettings] = useState({});
   const location = useLocation();
   const { user, logout } = useAuth();
   const cart = useCart();
+
+  useEffect(() => {
+    api.get('/settings').then((d) => setSettings(d || {})).catch(() => {});
+  }, []);
+
+  const storeName = settings.storeName || 'Eagle Shop';
+  const tagline = settings.tagline || 'Premium Liquor Store';
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 20);
@@ -50,16 +59,16 @@ export default function Navbar() {
       <div className="container-x">
         <nav className="flex items-center justify-between gap-4">
           {/* Brand */}
-          <Link to="/" className="flex items-center gap-2.5 shrink-0" aria-label="Eagle Shop Home">
+          <Link to="/" className="flex items-center gap-2.5 shrink-0" aria-label={`${storeName} Home`}>
             <div className="w-11 h-11 rounded-xl flex items-center justify-center border border-glass-border bg-deep-obsidian/60 shrink-0">
               <img src={logo} alt="" className="w-8 h-8 object-contain" />
             </div>
             <div className="flex flex-col leading-none">
               <strong className="font-heading text-[1.28rem] font-black tracking-tight text-gradient">
-                Eagle Shop
+                {storeName}
               </strong>
               <span className="font-ui text-[0.6rem] tracking-[0.2em] uppercase font-bold text-old-silver mt-0.5">
-                Premium Liquor Store
+                {tagline}
               </span>
             </div>
           </Link>
