@@ -1,0 +1,30 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "version": 2,
+  "public": false,
+  "buildCommand": "echo 'No build required'",
+  "installCommand": "npm install --omit=dev || npm install",
+  "outputDirectory": ".",
+  "functions": {
+    "server.js": {
+      "includeFiles": "config/**,controllers/**,middleware/**,models/**,routes/**,services/**,utils/**,node_modules/**",
+      "runtime": "@vercel/node@3"
+    }
+  },
+  "rewrites": [
+    { "source": "/api/(.*)", "destination": "/server.js" },
+    { "source": "/(.*)", "destination": "/server.js" }
+  ],
+  "headers": [
+    {
+      "source": "/uploads/(.*)",
+      "headers": [
+        { "key": "Cache-Control", "value": "public, max-age=31536000, immutable" },
+        { "key": "Content-Disposition", "value": "inline" }
+      ]
+    }
+  ],
+  "env": {
+    "VERCEL": "1"
+  }
+}
