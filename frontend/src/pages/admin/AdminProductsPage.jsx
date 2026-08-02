@@ -4,12 +4,13 @@ import useRedirect from '../../hooks/useRedirect';
 import api from '../../services/api';
 import AdminSidebar from '../../components/AdminSidebar';
 import {
-  Plus, Edit3, Trash2, Loader2, ImageOff, Package, Search, Bell,
+  Plus, Edit3, Trash2, ImageOff, Package, Search, Bell,
 } from 'lucide-react';
 import Input from '../../components/ui/Input';
 import Button from '../../components/ui/Button';
 import Modal from '../../components/ui/Modal';
 import Alert from '../../components/ui/Alert';
+import Skeleton from '../../components/ui/Skeleton';
 
 const emptyForm = {
   name: '', slug: '', category: '', brand: '', description: '', price: '', discount: 0,
@@ -147,8 +148,60 @@ export default function AdminProductsPage() {
             <div className="admin-sidebar-user-avatar">{userInitial}</div>
           </div>
         </div>
-        <main className="admin-main flex items-center justify-center min-h-[60vh]">
-          <Loader2 size={40} className="text-eagle-gold animate-spin" />
+        <main className="admin-main">
+          <div className="animate-fade-in">
+            <header className="page-header">
+              <div>
+                <Skeleton className="h-9 w-40 rounded" />
+                <Skeleton className="h-4 w-64 mt-3 rounded" />
+              </div>
+              <Skeleton className="h-10 w-40 rounded-full" />
+            </header>
+
+            <div className="glass-card p-3 mb-5">
+              <div className="flex items-center justify-between gap-3">
+                <Skeleton className="h-4 w-32 rounded" />
+                <Skeleton className="h-4 w-24 rounded" />
+              </div>
+            </div>
+
+            <div className="table-container has-sticky-header">
+              <table className="admin-table">
+                <thead>
+                  <tr>
+                    <th style={{ minWidth: 240 }}>Product</th>
+                    <th className="hidden md:table-cell">Category</th>
+                    <th>Price</th>
+                    <th className="hidden md:table-cell">Stock</th>
+                    <th className="hidden lg:table-cell">Status</th>
+                    <th className="hidden xl:table-cell">Visibility</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {Array.from({ length: 6 }).map((_, i) => (
+                    <tr key={i}>
+                      <td>
+                        <div className="flex items-center gap-3">
+                          <Skeleton className="h-11 w-11 rounded-lg shrink-0" />
+                          <div className="space-y-2">
+                            <Skeleton className="h-4 w-44 rounded" />
+                            <Skeleton className="h-3 w-28 rounded" />
+                          </div>
+                        </div>
+                      </td>
+                      <td className="hidden md:table-cell"><Skeleton className="h-4 w-24 rounded" /></td>
+                      <td><Skeleton className="h-4 w-16 rounded" /></td>
+                      <td className="hidden md:table-cell"><Skeleton className="h-4 w-12 rounded" /></td>
+                      <td className="hidden lg:table-cell"><Skeleton className="h-6 w-20 rounded-full" /></td>
+                      <td className="hidden xl:table-cell"><Skeleton className="h-4 w-16 rounded" /></td>
+                      <td><div className="flex gap-2"><Skeleton className="h-8 w-8 rounded-lg" /><Skeleton className="h-8 w-8 rounded-lg" /></div></td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
         </main>
       </div>
     );

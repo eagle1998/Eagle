@@ -3,10 +3,11 @@ import { useAuth } from '../../context/AuthContext';
 import useRedirect from '../../hooks/useRedirect';
 import api from '../../services/api';
 import AdminSidebar from '../../components/AdminSidebar';
-import { Eye, Check, X, Truck, Package, Clipboard, Loader2, ShoppingBag, Search, Bell } from 'lucide-react';
+import { Eye, Check, X, Truck, Package, Clipboard, ShoppingBag, Search, Bell } from 'lucide-react';
 import Button from '../../components/ui/Button';
 import Modal from '../../components/ui/Modal';
 import Alert from '../../components/ui/Alert';
+import Skeleton from '../../components/ui/Skeleton';
 
 const STATUSES = ['pending', 'accepted', 'packed', 'dispatched', 'delivered', 'cancelled', 'rejected'];
 

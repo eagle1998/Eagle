@@ -4,9 +4,10 @@ import { useAuth } from '../../context/AuthContext';
 import useRedirect from '../../hooks/useRedirect';
 import api from '../../services/api';
 import AdminSidebar from '../../components/AdminSidebar';
+import Skeleton from '../../components/ui/Skeleton';
 import {
   Package, ShoppingBag, AlertTriangle, DollarSign, Users, TrendingUp,
-  Layers, Settings, ArrowRight, Loader2, Search, Bell, Eye
+  Layers, Settings, ArrowRight, Search, Bell, Eye
 } from 'lucide-react';
 
 const GOLD = 'var(--eagle-gold)';
@@ -90,8 +91,68 @@ export default function AdminDashboardPage() {
             <div className="admin-sidebar-user-avatar">{userInitial}</div>
           </div>
         </div>
-        <main className="admin-main flex items-center justify-center min-h-[60vh]">
-          <Loader2 size={40} className="text-eagle-gold animate-spin" />
+        <main className="admin-main">
+          <div className="animate-fade-in">
+            <header className="page-header">
+              <div>
+                <Skeleton className="h-9 w-48 rounded" />
+                <Skeleton className="h-4 w-80 mt-3 rounded" />
+              </div>
+              <Skeleton className="h-10 w-36 rounded-full" />
+            </header>
+
+            <div className="stats-grid">
+              {[0, 1, 2].map((i) => (
+                <div key={i} className="stat-card glass-card">
+                  <Skeleton className="h-12 w-12 rounded-2xl shrink-0" />
+                  <div className="min-w-0 flex-1 space-y-2.5">
+                    <Skeleton className="h-4 w-28 rounded" />
+                    <Skeleton className="h-8 w-16 rounded" />
+                    <Skeleton className="h-3 w-36 rounded" />
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <section className="mb-10 mt-8">
+              <Skeleton className="h-3 w-28 mb-4 rounded" />
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                {[0, 1, 2, 3].map((i) => (
+                  <div key={i} className="glass-card p-5 flex flex-col gap-3">
+                    <div className="flex items-center gap-3">
+                      <Skeleton className="h-11 w-11 rounded-2xl shrink-0" />
+                      <div className="flex-1 space-y-2">
+                        <Skeleton className="h-4 w-3/4 rounded" />
+                        <Skeleton className="h-3 w-1/2 rounded" />
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </section>
+
+            <div className="glass-card overflow-hidden">
+              <div className="flex items-center justify-between px-5 py-4 border-b border-glass-border">
+                <Skeleton className="h-5 w-44 rounded" />
+                <Skeleton className="h-8 w-24 rounded-full" />
+              </div>
+              <div className="flex flex-col">
+                {[0, 1, 2, 3, 4].map((i) => (
+                  <div key={i} className="flex items-center gap-3 px-5 py-3.5 border-b border-glass-border last:border-b-0">
+                    <Skeleton className="h-10 w-10 rounded-xl shrink-0" />
+                    <div className="min-w-0 flex-1 space-y-2">
+                      <Skeleton className="h-4 w-56 max-w-full rounded" />
+                      <Skeleton className="h-3 w-32 rounded" />
+                    </div>
+                    <div className="text-right space-y-2 shrink-0">
+                      <Skeleton className="h-4 w-16 ml-auto rounded" />
+                      <Skeleton className="h-3 w-20 ml-auto rounded" />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
         </main>
       </div>
     );
