@@ -3,12 +3,6 @@
   "version": 2,
   "buildCommand": "echo \"No build required\"",
   "installCommand": "npm install --omit=dev || npm install",
-  "functions": {
-    "server.js": {
-      "runtime": "nodejs22.x",
-      "includeFiles": "config/**,controllers/**,middleware/**,models/**,routes/**,services/**,utils/**"
-    }
-  },
   "rewrites": [
     {
       "source": "/(.*)",

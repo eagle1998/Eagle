@@ -4,7 +4,7 @@
   "description": "Eagle Beer Shop Express + MongoDB Backend",
   "main": "server.js",
   "engines": {
-    "node": ">=20"
+    "node": "22.x"
   },
   "scripts": {
     "start": "node server.js",
