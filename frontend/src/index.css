@@ -517,7 +517,7 @@
     display: flex;
     flex-wrap: wrap;
     gap: 0.4rem;
-    z-index: 50;
+    z-index: 5;
     isolation: isolate;
   }
   .product-badges-right {
@@ -527,7 +527,7 @@
     display: flex;
     flex-direction: column;
     gap: 0.4rem;
-    z-index: 50;
+    z-index: 5;
     align-items: flex-end;
     isolation: isolate;
   }

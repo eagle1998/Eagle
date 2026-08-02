@@ -308,12 +308,22 @@ export default function CartDrawer({ settings = {} }) {
                   <span>Subtotal</span>
                   <span className="tabular-nums font-semibold" style={{ color: 'var(--frost)' }}>₹{subtotal.toLocaleString()}</span>
                 </div>
-                <div className="font-ui text-xs" style={{ color: 'var(--old-silver)' }}>
-                  Delivery fee calculated at checkout · Free on orders over ₹{freeThreshold.toLocaleString()}
+                <div className="flex justify-between items-center" style={{ color: 'var(--warm-silver)' }}>
+                  <span>
+                    Delivery Charge
+                    {subtotal > 0 && subtotal < freeThreshold && (
+                      <span className="block text-xs" style={{ color: 'var(--old-silver)' }}>
+                        Free on orders over ₹{freeThreshold.toLocaleString()}
+                      </span>
+                    )}
+                  </span>
+                  <span className="tabular-nums font-semibold" style={{ color: delivery === 0 ? 'var(--color-success)' : 'var(--frost)' }}>
+                    {delivery === 0 ? 'FREE' : `₹${delivery.toLocaleString()}`}
+                  </span>
                 </div>
                 <div className="flex items-center justify-between pt-3 mt-2 border-t border-glass-border">
                   <span className="font-bold uppercase tracking-[0.12em] text-xs" style={{ color: 'var(--eagle-gold)' }}>
-                    Estimated Total
+                    Grand Total
                   </span>
                   <span
                     className="font-ui font-extrabold text-2xl tracking-tight tabular-nums"

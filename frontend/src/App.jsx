@@ -25,6 +25,7 @@ function AppLayout() {
         <Route path="/admin/login" element={<LoginPage />} />
         <Route path="/admin/register" element={<AdminRegister />} />
         <Route path="/admin" element={<AdminDashboardPage />} />
+        <Route path="/admin/dashboard" element={<AdminDashboardPage />} />
         <Route path="/admin/products" element={<AdminProductsPage />} />
         <Route path="/admin/products/new" element={<AdminProductFormPage />} />
         <Route path="/admin/products/edit/:id" element={<AdminProductFormPage />} />
