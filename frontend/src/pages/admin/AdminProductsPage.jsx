@@ -1,53 +1,33 @@
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import useRedirect from '../../hooks/useRedirect';
 import api from '../../services/api';
 import AdminSidebar from '../../components/AdminSidebar';
 import {
-  Plus, Edit3, Trash2, ImageOff, Package, Search, Bell,
+  Plus, Edit3, Trash2, Loader2, ImageOff, Package, Search, Bell,
 } from 'lucide-react';
-import Input from '../../components/ui/Input';
 import Button from '../../components/ui/Button';
-import Modal from '../../components/ui/Modal';
 import Alert from '../../components/ui/Alert';
-import Skeleton from '../../components/ui/Skeleton';
-
-const emptyForm = {
-  name: '', slug: '', category: '', brand: '', description: '', price: '', discount: 0,
-  stock: 0, stockStatus: 'in_stock', isVisible: true, isFeatured: false,
-  alcohol: '', volume: '', origin: '', images: [], imagesInput: '', accent: ''
-};
-
-const slugify = (str) => String(str || '').toLowerCase().trim().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
-
-const isValidSlug = (slug) => /^[a-z0-9-]+$/.test(slug);
 
 export default function AdminProductsPage() {
-  const { loading: authLoading, user } = useRedirect();
+  const { loading: authLoading } = useRedirect();
+  const navigate = useNavigate();
   const [products, setProducts] = useState([]);
-  const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [modal, setModal] = useState(false);
-  const [editing, setEditing] = useState(null);
-  const [form, setForm] = useState(emptyForm);
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(null);
-  const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState(null);
-  const [autoSlug, setAutoSlug] = useState(true);
-  const [slugError, setSlugError] = useState('');
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
 
+  const user = useAuth().user;
   const userInitial = user?.name?.[0]?.toUpperCase() || user?.email?.[0]?.toUpperCase() || 'A';
 
   useEffect(() => {
     if (authLoading) return;
     setLoading(true);
-    Promise.all([
-      api.get('/products/manage').then(d => Array.isArray(d) ? d : []),
-      api.get('/categories').then(d => Array.isArray(d) ? d : [])
-    ]).then(([p, c]) => { setProducts(p); setCategories(c); }).catch(() => { }).finally(() => setLoading(false));
+    api.get('/products/manage').then(d => { setProducts(Array.isArray(d) ? d : []); }).catch(() => { }).finally(() => setLoading(false));
   }, [authLoading]);
 
   const filteredProducts = products.filter(p => {
@@ -60,65 +40,6 @@ export default function AdminProductsPage() {
     return matchSearch && matchStatus;
   });
 
-  const openCreate = () => { setForm({ ...emptyForm }); setEditing(null); setError(null); setSuccess(null); setSlugError(''); setAutoSlug(true); setModal(true); };
-  const openEdit = (p) => {
-    setForm({
-      name: p.name || '', slug: p.slug || '', category: p.category?._id || p.category || '',
-      brand: p.brand || '', description: p.description || '', price: p.price || '', discount: p.discount || 0,
-      stock: p.stock ?? 0, stockStatus: p.stockStatus || 'in_stock', isVisible: p.isVisible !== false,
-      isFeatured: p.isFeatured || false, alcohol: p.alcohol || '', volume: p.volume || '',
-      origin: p.origin || '', images: p.images || [], imagesInput: (p.images || []).join(', '), accent: p.accent || ''
-    });
-    setEditing(p); setError(null); setSuccess(null); setSlugError(''); setAutoSlug(false); setModal(true);
-  };
-  const closeModal = () => { setModal(false); setEditing(null); setForm({ ...emptyForm }); setError(null); setSuccess(null); setSlugError(''); setAutoSlug(true); };
-
-  const handleChange = (e) => {
-    const { name, value, type, checked } = e.target;
-    if (name === 'slug') setAutoSlug(false);
-    if (name === 'name' && autoSlug && !editing) {
-      setForm(prev => ({ ...prev, name: value, slug: slugify(value) }));
-      return;
-    }
-    setForm(prev => ({ ...prev, [name]: type === 'checkbox' ? checked : value }));
-    if (name === 'slug') setSlugError('');
-  };
-
-  const submit = async (e) => {
-    e.preventDefault();
-    setError(null);
-    setSlugError('');
-    const slug = slugify(form.slug);
-    if (!slug || !isValidSlug(slug)) {
-      setSlugError('Slug must contain only lowercase letters, numbers and hyphens (e.g. premium-whisky).');
-      return;
-    }
-    setSaving(true);
-    try {
-      if (!form.category) {
-        throw new Error('Please select a category for the product.');
-      }
-      const images = form.imagesInput ? form.imagesInput.split(',').map(u => u.trim()).filter(Boolean) : form.images;
-      const payload = { ...form, slug, images, price: Number(form.price), discount: Number(form.discount), stock: Number(form.stock) };
-      delete payload.imagesInput;
-      if (editing) {
-        await api.put(`/products/${editing._id || editing.id}`, payload);
-        setSuccess('Product updated successfully!');
-      } else {
-        await api.post('/products', payload);
-        setSuccess('Product created successfully!');
-      }
-      setTimeout(() => setSuccess(null), 3000);
-      closeModal();
-      const data = await api.get('/products/manage');
-      setProducts(Array.isArray(data) ? data : []);
-    } catch (err) {
-      setError(err?.response?.data?.message || err?.message || 'Failed to save');
-    } finally {
-      setSaving(false);
-    }
-  };
-
   const remove = async (id) => {
     if (!window.confirm('Delete this product? This action cannot be undone.')) return;
     setDeleting(id);
@@ -128,7 +49,7 @@ export default function AdminProductsPage() {
       setSuccess('Product deleted successfully!');
       setTimeout(() => setSuccess(null), 3000);
     } catch (err) {
-      alert(err?.response?.data?.message || 'Delete failed');
+      setError(err?.response?.data?.message || 'Delete failed');
     } finally {
       setDeleting(null);
     }
@@ -148,60 +69,8 @@ export default function AdminProductsPage() {
             <div className="admin-sidebar-user-avatar">{userInitial}</div>
           </div>
         </div>
-        <main className="admin-main">
-          <div className="animate-fade-in">
-            <header className="page-header">
-              <div>
-                <Skeleton className="h-9 w-40 rounded" />
-                <Skeleton className="h-4 w-64 mt-3 rounded" />
-              </div>
-              <Skeleton className="h-10 w-40 rounded-full" />
-            </header>
-
-            <div className="glass-card p-3 mb-5">
-              <div className="flex items-center justify-between gap-3">
-                <Skeleton className="h-4 w-32 rounded" />
-                <Skeleton className="h-4 w-24 rounded" />
-              </div>
-            </div>
-
-            <div className="table-container has-sticky-header">
-              <table className="admin-table">
-                <thead>
-                  <tr>
-                    <th style={{ minWidth: 240 }}>Product</th>
-                    <th className="hidden md:table-cell">Category</th>
-                    <th>Price</th>
-                    <th className="hidden md:table-cell">Stock</th>
-                    <th className="hidden lg:table-cell">Status</th>
-                    <th className="hidden xl:table-cell">Visibility</th>
-                    <th>Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {Array.from({ length: 6 }).map((_, i) => (
-                    <tr key={i}>
-                      <td>
-                        <div className="flex items-center gap-3">
-                          <Skeleton className="h-11 w-11 rounded-lg shrink-0" />
-                          <div className="space-y-2">
-                            <Skeleton className="h-4 w-44 rounded" />
-                            <Skeleton className="h-3 w-28 rounded" />
-                          </div>
-                        </div>
-                      </td>
-                      <td className="hidden md:table-cell"><Skeleton className="h-4 w-24 rounded" /></td>
-                      <td><Skeleton className="h-4 w-16 rounded" /></td>
-                      <td className="hidden md:table-cell"><Skeleton className="h-4 w-12 rounded" /></td>
-                      <td className="hidden lg:table-cell"><Skeleton className="h-6 w-20 rounded-full" /></td>
-                      <td className="hidden xl:table-cell"><Skeleton className="h-4 w-16 rounded" /></td>
-                      <td><div className="flex gap-2"><Skeleton className="h-8 w-8 rounded-lg" /><Skeleton className="h-8 w-8 rounded-lg" /></div></td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
+        <main className="admin-main flex items-center justify-center min-h-[60vh]">
+          <Loader2 size={40} className="text-eagle-gold animate-spin" />
         </main>
       </div>
     );
@@ -239,7 +108,7 @@ export default function AdminProductsPage() {
                 {filteredProducts.length !== products.length && ` · ${filteredProducts.length} matching`}
               </p>
             </div>
-            <Button icon={Plus} onClick={openCreate}>Add Product</Button>
+            <Button icon={Plus} onClick={() => navigate('/admin/products/new')}>Add Product</Button>
           </header>
 
           {success && <Alert type="success" message={success} onDismiss={() => setSuccess(null)} />}
@@ -350,7 +219,7 @@ export default function AdminProductsPage() {
                       </td>
                       <td>
                         <div className="flex items-center gap-1.5">
-                          <Button size="sm" variant="secondary" onClick={() => openEdit(p)} title="Edit">
+                          <Button size="sm" variant="secondary" onClick={() => navigate(`/admin/products/edit/${id}`)} title="Edit">
                             <Edit3 size={14} strokeWidth={2} />
                           </Button>
                           <Button size="sm" variant="danger" onClick={() => remove(id)} title="Delete" disabled={deleting === id}>
@@ -364,73 +233,6 @@ export default function AdminProductsPage() {
               </tbody>
             </table>
           </div>
-
-          <Modal isOpen={modal} onClose={closeModal} title={editing ? 'Edit Product' : 'New Product'} size="lg">
-            {error && <Alert type="error" message={error} onDismiss={() => setError(null)} />}
-            <form onSubmit={submit}>
-              <div className="form-row">
-                <Input label="Name" name="name" value={form.name} onChange={handleChange} required placeholder="Product name" />
-                <Input
-                  label="Slug"
-                  name="slug"
-                  value={form.slug}
-                  onChange={handleChange}
-                  required
-                  placeholder="product-slug"
-                  error={slugError || undefined}
-                  helper={!slugError ? 'Auto-generated from name. Lowercase letters, numbers and hyphens.' : undefined}
-                />
-              </div>
-              <div className="form-row">
-                <Input type="select" label="Category" name="category" value={form.category} required onChange={handleChange}>
-                  <option value="">No category</option>
-                  {categories.map(c => <option key={c._id || c.id} value={c._id || c.id}>{c.name}</option>)}
-                </Input>
-                <Input label="Brand" name="brand" value={form.brand} onChange={handleChange} placeholder="Brand name" />
-              </div>
-              <Input label="Description" name="description" rows={3} value={form.description} onChange={handleChange} placeholder="Product description" />
-              <Input
-                label="Image URLs (comma-separated)"
-                name="imagesInput"
-                value={form.imagesInput}
-                onChange={handleChange}
-                placeholder="https://example.com/image1.jpg, https://example.com/image2.jpg"
-              />
-              <div className="form-row">
-                <Input label="Price (₹)" name="price" type="number" value={form.price} onChange={handleChange} required min="0" step="0.01" placeholder="0" />
-                <Input label="Discount (%)" name="discount" type="number" value={form.discount} onChange={handleChange} min="0" max="100" placeholder="0" />
-                <Input label="Stock" name="stock" type="number" value={form.stock} onChange={handleChange} min="0" placeholder="0" />
-              </div>
-              <div className="form-row">
-                <Input type="select" label="Stock Status" name="stockStatus" value={form.stockStatus} onChange={handleChange}>
-                  <option value="in_stock">In Stock</option>
-                  <option value="low_stock">Low Stock</option>
-                  <option value="out_of_stock">Out of Stock</option>
-                </Input>
-                <Input label="Alcohol %" name="alcohol" value={form.alcohol} onChange={handleChange} placeholder="e.g. 40%" />
-                <Input label="Volume" name="volume" value={form.volume} onChange={handleChange} placeholder="e.g. 750ml" />
-              </div>
-              <div className="form-row">
-                <Input label="Origin" name="origin" value={form.origin} onChange={handleChange} placeholder="e.g. Scotland" />
-              </div>
-              <div className="flex items-center gap-6 mb-6">
-                <label className="flex items-center gap-2 cursor-pointer text-sm transition-colors font-ui" style={{ color: 'var(--warm-silver)' }}>
-                  <input type="checkbox" name="isVisible" checked={form.isVisible} onChange={handleChange} className="accent-eagle-gold w-4 h-4" />
-                  Visible
-                </label>
-                <label className="flex items-center gap-2 cursor-pointer text-sm transition-colors font-ui" style={{ color: 'var(--warm-silver)' }}>
-                  <input type="checkbox" name="isFeatured" checked={form.isFeatured} onChange={handleChange} className="accent-eagle-gold w-4 h-4" />
-                  Featured
-                </label>
-              </div>
-              <div className="modal-footer-actions flex flex-wrap gap-3 pt-4 border-t border-glass-border" style={{ justifyContent: 'flex-end' }}>
-                <Button type="button" variant="secondary" onClick={closeModal} style={{ minWidth: '6.5rem' }}>Cancel</Button>
-                <Button type="submit" loading={saving} style={{ minWidth: '11rem' }}>
-                  {saving ? 'Saving...' : editing ? 'Update Product' : 'Create Product'}
-                </Button>
-              </div>
-            </form>
-          </Modal>
         </div>
       </main>
     </div>

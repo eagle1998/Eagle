@@ -16,6 +16,7 @@ export default function Modal({
   children,
   hideClose = false,
   stickyFooter = true,
+  fillHeight = false,
 }) {
   useEffect(() => {
     if (!isOpen) return undefined;
@@ -70,7 +71,7 @@ export default function Modal({
   return (
     <div className="modal-backdrop" onClick={onClose} role="dialog" aria-modal="true" aria-labelledby={title ? 'modal-title' : undefined}>
       <div
-        className={`modal-content ${sizeClass[size] || ''}`.trim()}
+        className={`modal-content ${sizeClass[size] || ''}${fillHeight ? ' modal-fill' : ''}`.trim()}
         onClick={(e) => e.stopPropagation()}
       >
         {(title || !hideClose) && (

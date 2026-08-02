@@ -7,7 +7,9 @@ import AdminRegister from './pages/AdminRegister.jsx';
 import NotFoundPage from './pages/NotFoundPage.jsx';
 import AdminDashboardPage from './pages/admin/AdminDashboardPage.jsx';
 import AdminProductsPage from './pages/admin/AdminProductsPage.jsx';
+import AdminProductFormPage from './pages/admin/AdminProductFormPage.jsx';
 import AdminCategoriesPage from './pages/admin/AdminCategoriesPage.jsx';
+import AdminCategoryFormPage from './pages/admin/AdminCategoryFormPage.jsx';
 import AdminSettingsPage from './pages/admin/AdminSettingsPage.jsx';
 
 function AppLayout() {
@@ -24,7 +26,11 @@ function AppLayout() {
         <Route path="/admin/register" element={<AdminRegister />} />
         <Route path="/admin" element={<AdminDashboardPage />} />
         <Route path="/admin/products" element={<AdminProductsPage />} />
+        <Route path="/admin/products/new" element={<AdminProductFormPage />} />
+        <Route path="/admin/products/edit/:id" element={<AdminProductFormPage />} />
         <Route path="/admin/categories" element={<AdminCategoriesPage />} />
+        <Route path="/admin/categories/new" element={<AdminCategoryFormPage />} />
+        <Route path="/admin/categories/edit/:id" element={<AdminCategoryFormPage />} />
         <Route path="/admin/settings" element={<AdminSettingsPage />} />
         <Route path="*" element={<NotFoundPage />} />
       </Routes>
