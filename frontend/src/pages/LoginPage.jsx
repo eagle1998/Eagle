@@ -1,7 +1,7 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { LogIn } from 'lucide-react';
+import { LogIn, UserPlus } from 'lucide-react';
 import logo from '../assets/logo.png';
 import Input from '../components/ui/Input';
 import Button from '../components/ui/Button';
@@ -44,6 +44,9 @@ function LoginPage() {
           <Input label="Password" name="password" type="password" value={password} onChange={e => setPassword(e.target.value)} placeholder="••••••••" required />
           <Button type="submit" icon={LogIn} className="w-full justify-center mt-4" disabled={loading}>
             {loading ? 'Signing In...' : 'Sign In'}
+          </Button>
+          <Button as={Link} to="/admin/register" variant="secondary" icon={UserPlus} className="w-full justify-center mt-3">
+            Create Admin Account
           </Button>
         </form>
       </div>

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { UserPlus, Eye, EyeOff } from 'lucide-react';
 import logo from '../assets/logo.png';
@@ -117,6 +117,13 @@ function AdminRegister() {
             {loading ? 'Registering...' : 'Register'}
           </Button>
         </form>
+
+        <p className="font-ui text-sm mt-6" style={{ color: 'var(--old-silver)' }}>
+          Already have an admin account?{' '}
+          <Link to="/admin/login" className="text-eagle-gold hover:text-soft-gold transition-colors font-semibold">
+            Sign In
+          </Link>
+        </p>
       </div>
     </div>
   );
