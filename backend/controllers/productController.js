@@ -1,5 +1,6 @@
 const catchAsync = require('../utils/catchAsync');
 const ApiError = require('../utils/ApiError');
+const path = require('path');
 const { z } = require('zod');
 const Product = require('../models/Product');
 
@@ -72,12 +73,30 @@ const deleteProduct = catchAsync(async (req, res) => {
 
 const uploadProductImage = catchAsync(async (req, res) => {
   if (!req.file) throw new ApiError(400, 'No file uploaded');
-  const uploadPath = process.env.UPLOAD_PATH || 'uploads';
-  const fullPath = req.file.path.replace(/\\/g, '/');
-  const idx = fullPath.indexOf(uploadPath);
-  const relativePath = idx !== -1 ? fullPath.substring(idx + uploadPath.length + 1) : req.file.filename;
-  const imageUrl = `${req.protocol}://${req.get('host')}/${uploadPath}/${relativePath}`;
-  res.status(200).json({ imageUrl, filename: req.file.filename });
+
+  const { useBlob } = require('../middleware/upload');
+
+  let imageUrl;
+  if (useBlob) {
+    // Production: persist to Vercel Blob (serverless-safe, permanent URL)
+    const { put } = require('@vercel/blob');
+    const ext = path.extname(req.file.originalname) || '.jpg';
+    const blob = await put(`products/${Date.now()}-${req.file.originalname.replace(/\s+/g, '-')}${ext}`, req.file.buffer, {
+      access: 'public',
+      contentType: req.file.mimetype,
+      addRandomSuffix: true,
+    });
+    imageUrl = blob.url;
+  } else {
+    // Local dev: serve from /uploads
+    const uploadPath = process.env.UPLOAD_PATH || 'uploads';
+    const fullPath = req.file.path.replace(/\\/g, '/');
+    const idx = fullPath.indexOf(uploadPath);
+    const relativePath = idx !== -1 ? fullPath.substring(idx + uploadPath.length + 1) : req.file.filename;
+    imageUrl = `${req.protocol}://${req.get('host')}/${uploadPath}/${relativePath}`;
+  }
+
+  res.status(200).json({ imageUrl, filename: req.file.originalname });
 });
 
 module.exports = { getAllProducts, getFeatured, getAllProductsAdmin, getProductBySlug, getProductById, createProduct, updateProduct, deleteProduct, uploadProductImage };

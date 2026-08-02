@@ -6,24 +6,7 @@ const ApiError = require('../utils/ApiError');
 
 const ALLOWED_MIME = ['image/jpeg', 'image/png', 'image/webp'];
 const ALLOWED_EXT = ['.jpg', '.jpeg', '.png', '.webp'];
-const MAX_SIZE = parseInt(process.env.MAX_UPLOAD_SIZE) || 5 * 1024 * 1024;
-
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    const now = new Date();
-    const year = now.getFullYear().toString();
-    const month = String(now.getMonth() + 1).padStart(2, '0');
-    const uploadBase = process.env.UPLOAD_PATH || 'uploads';
-    const destDir = path.join(__dirname, '..', uploadBase, year, month);
-
-    fs.mkdirSync(destDir, { recursive: true });
-    cb(null, destDir);
-  },
-  filename: (req, file, cb) => {
-    const ext = path.extname(file.originalname);
-    cb(null, uuidv4() + ext);
-  }
-});
+const MAX_SIZE = parseInt(process.env.MAX_UPLOAD_SIZE, 10) || 5 * 1024 * 1024;
 
 const fileFilter = (req, file, cb) => {
   const ext = path.extname(file.originalname).toLowerCase();
@@ -34,10 +17,36 @@ const fileFilter = (req, file, cb) => {
   }
 };
 
+// Production (Vercel): memory storage + upload to Vercel Blob in the controller.
+// Local dev: disk storage under /uploads so files persist on the local filesystem.
+const useBlob = Boolean(process.env.BLOB_READ_WRITE_TOKEN);
+
+let storage;
+if (useBlob) {
+  storage = multer.memoryStorage();
+} else {
+  storage = multer.diskStorage({
+    destination: (req, file, cb) => {
+      const now = new Date();
+      const year = now.getFullYear().toString();
+      const month = String(now.getMonth() + 1).padStart(2, '0');
+      const uploadBase = process.env.UPLOAD_PATH || 'uploads';
+      const destDir = path.join(__dirname, '..', uploadBase, year, month);
+
+      fs.mkdirSync(destDir, { recursive: true });
+      cb(null, destDir);
+    },
+    filename: (req, file, cb) => {
+      const ext = path.extname(file.originalname);
+      cb(null, uuidv4() + ext);
+    }
+  });
+}
+
 const productImageUpload = multer({
   storage,
   fileFilter,
   limits: { fileSize: MAX_SIZE }
 }).single('image');
 
-module.exports = productImageUpload;
+module.exports = { productImageUpload, useBlob };
